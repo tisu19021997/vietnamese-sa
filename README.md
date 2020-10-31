@@ -17,7 +17,7 @@
     * Remove accents: removing accents alone will drop the accuracy, however when using the accents removed dataset together with the original one, the accuracy is higher.
     * Remove double negative: turn words like "không" in positive sentences into some positive words => this gives the model an easier dataset to train on but when the model meets "hard" dataset that contains double negative, it performs poorly.
     * Turn "chẳng đẹp/ngon" or "không tệ" to "not-positive" and "not-negative".
-    * Add negative/positive words with negative/positive to train set.
+    * Replace negative/positive words with "negative" or "positive".
 
 ### 2. Models and Feature Engineering
 
@@ -47,22 +47,21 @@ Split train set to 2 sub-sets (70:30), one for fitting and one for validation.
     * LogisticRegression(C=10.0): 0.8962
     * SGDClassifier(loss='log'): 0.877
     * XGBoost(n_estimators=100): 0.8327
-    * Hard VotingClassifier: 0.896
+    * Hard VotingClassifier (with Logistic, SGD, and RandomForest): 0.896
     * Neural Networks with Embedding: I tried GRU and LSTM, both overfit as 9th-10th epoch, val_accuracy stopped at ~0.89.
  
 ### 3. Conclusion and problems 
-* TF-IDF + Linear perform best. However, the model suffers from "double negative" problem. 
-Most positive samples with "nhưng", "mỗi tội", "nên không", etc isn't correctly classified.
-* When I manually check the dataset, there are a lot of mis-labeled example.
+* Best pipeline is **TF-IDF + Linear** (based on the accuracy score on validation set). I then fine-tuned the pipeline using Grid Search cross-validation. 
+* However, the model suffers from "double negative" problem. 
+Most positive samples with "nhưng", "mỗi tội", "nên không", etc aren't correctly classified.
 * Samples with broken font and accent (e.g, "nho ̉ nhă ́ va ̀ co ́ ve ̉ kha ́ châ ̣ nv ba ́ ve ́ thi ̀ niê ̀ mình") is usually misclassified.
-* Some comments are in English: a future solution maybe translate some Vietnamese samples to English, fit on them (or using English pre-train embedding?).
-* Words with word "không" included (e.g "không gian", "không biết") will be given negative weights => may cause problems.
-* I think the data need more good processing.
+* Words with word "không" included (e.g "không gian", "không biết") would easily be given negative weights although the sentence is positive overall => may cause problems.
 
 ### 4. Feature works
 * Neural Networks are promising (although the fit time for NN with LSTM layers are too large), solving the overfitting problem may open some doors. 
-Moreover, as I researched, method like "Weight Ensemble" would work for Vietnamese sentiment analysis.
-* Re-label dataset + fix samples with "broken accent".
+Moreover, as I researched, method like "Weight Ensemble" would work for Vietnamese sentiment analysis. Also should give Bidirectional LSTM a try.
+* When I manually check the dataset, there are a lot of mis-labeled example. Re-label dataset + fix samples with "broken accent" would be a good thing to do.
+* Some comments are in English: a future solution maybe translate some Vietnamese samples to English, fit the model on them (or using English pre-train embedding?).
 
 
 [stopwords]: https://github.com/stopwords/vietnamese-stopwords/blob/master/vietnamese-stopwords.txt
